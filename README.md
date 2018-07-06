@@ -111,19 +111,40 @@ java -Xmx16g -jar GenomeAnalysisTK.jar \
 
 This step uses the pysim script `run_art.py`
 
-(Install this fork of Pysim (from a rotation student who fixed pysim bugs))[https://github.com/auberginekenobi/pysim]
+[Install this fork of Pysim (from a rotation student who fixed pysim bugs)](https://github.com/auberginekenobi/pysim)
 
+```
+git clone --recursive https://github.com/auberginekenobi/pysim.git
+```
 
-(Linux source:)[https://www.niehs.nih.gov/research/resources/assets/docs/artsrcmountrainier2016.06.05linux.tgz]
-(Website)[https://www.niehs.nih.gov/research/resources/software/biostatistics/art/index.cfm]
+[ART Linux source:](https://www.niehs.nih.gov/research/resources/assets/docs/artsrcmountrainier2016.06.05linux.tgz)
+[ART website](https://www.niehs.nih.gov/research/resources/software/biostatistics/art/index.cfm)
   
 * REF commands
 
 ```
-
+$ python pysim/run_art.py -i human_g1k_v37.22.fasta -l 150 -f 1000 -m 400 -s 90 -o sim_snps.REF.22.1000x
 ```
 
-* ALT
+* ALT commands
+
+```
+$ python pysim/run_art.py -i human_g1k_v37.22.ALT.fasta -l 150 -f 1000 -m 400 -s 90 -o sim_snps.ALT.22.1000x
+```
+
+The ART commands will generate two FASTQ output files: `sim_snps.ALT.22.1000x.1.fq` and `sim_snps.ALT.22.1000x.2.fq`
+
+ART options:
+
+* `-l` : Read length (bp)
+* `-f` : fold coverage (1000x). 
+* `-m` : mean size of the DNA fragments for paired-end simulations
+* `-s`: standard deviation of the RNA gragment size for paired-end simulations (I think 90 is default)
+
+**Note on coverage**
+Due to possible downsampling in the subsequent pysim mixture step, I recommend simulating higher coverage and down-sampling to the desired coverage after the mixture step. 
+
+I found 1000x simulations are around 670X after the mixture step with bedtools genomecov. This might be due to ART simulating "N" nucleotides found in unmappable regions of the genome (The p-arm of chr22 for example). 
 
 6. pysim mixture_v1.py
 
