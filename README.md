@@ -100,15 +100,30 @@ bash scripts/gatk_fasta_alt_maker.sh in.vcf
 **GATK command:**
 
 ```
-
 java -Xmx16g -jar GenomeAnalysisTK.jar \
--T FastaAlternateReferenceMaker -R $fasta -o /oasis/projects/nsf/ddp195/dantakli/sperm/somatic_sim/human_g1k_v37.22.ALT.fasta -L 22 -V $1
+                  -T FastaAlternateReferenceMaker \
+                  -R human_g1k_v37.22.fasta \
+                  -o human_g1k_v37.22.ALT.fasta \
+                  -L 22 -V sim_snps.22.filtered.vcf
 ```
 
+5. Simulate Illumina Paired-End reads with ART 
 
-5. ART Illumina Simulator 1000x
-  * REF
-  * ALT
+This step uses the pysim script `run_art.py`
+
+(Install this fork of Pysim (from a rotation student who fixed pysim bugs))[https://github.com/auberginekenobi/pysim]
+
+
+(Linux source:)[https://www.niehs.nih.gov/research/resources/assets/docs/artsrcmountrainier2016.06.05linux.tgz]
+(Website)[https://www.niehs.nih.gov/research/resources/software/biostatistics/art/index.cfm]
+  
+* REF commands
+
+```
+
+```
+
+* ALT
 
 6. pysim mixture_v1.py
 
