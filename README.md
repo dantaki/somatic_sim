@@ -16,15 +16,15 @@
 ---
 
 
-1. Generate random SNPs
+## 1. Generate random SNPs
 
 ```
 $ randomBed -l 1 -n 1000000 -g human.hg19.22.genome  | cut -f 1-3  | sortBed >sim_snps.22.bed
 ```
 
-2 Remove SNPs within excluded regions
+## 2 Remove SNPs within excluded regions
 
-## Excluded Regions:
+### Excluded Regions:
 
 * RepeatMasker 
 * Short Tandem Repeats (STR)
@@ -39,13 +39,13 @@ $ intersectBed -a sim_snps.22.bed -b /home/dantakli/resources/repeatmasker/repea
                                      -wa -v >sim_snps.22.filtered.bed
 ```
 
-3. Randomly select 10,000 SNPs
+## 3. Randomly select 10,000 SNPs
 
 ```
 $ shuf sim_snps.22.filtered.bed | head -n 10000 | sortBed >sim_snps.22.filtered.10k.bed
 ```
 
-4. Make a VCF with ALT alleles
+## 4. Make a VCF with ALT alleles
 
 ```
 $ python src/make_snps.py sim_snps.22.filtered.10k.bed
@@ -78,7 +78,7 @@ The script determines the reference nucleotide for a given position and randomly
 
 For example, at chr22:17280662 the reference allele is `T`. The script will randomly pick `A`,`G`, or `C` as the ALT allele.
 
-5. GATK FastaAlternateReferenceMaker
+## 5. GATK FastaAlternateReferenceMaker
 
 Use GATK to create a FASTA file containing ALT alleles. This FASTA file will be used to simulate Illumina reads.
 
@@ -107,7 +107,7 @@ java -Xmx16g -jar GenomeAnalysisTK.jar \
                   -L 22 -V sim_snps.22.filtered.vcf
 ```
 
-5. Simulate Illumina Paired-End reads with ART 
+## 6. Simulate Illumina Paired-End reads with ART 
 
 This step uses the pysim script `run_art.py`
 
@@ -146,10 +146,86 @@ Due to possible downsampling in the subsequent pysim mixture step, I recommend s
 
 I found 1000x simulations are around 670X after the mixture step with bedtools genomecov. This might be due to ART simulating "N" nucleotides found in unmappable regions of the genome (The p-arm of chr22 for example). 
 
-6. pysim mixture_v1.py
+## 7. pysim mixture_v1.py
 
-7. bwa mem align
+**Note on mixture_v1.py**
+This script is a memory hog. I found it better to split my FASTQs into files of 100,000,000 lines first. 
 
-8. samtools sort & sub-sample to 500x
+```
+$ split -l 100000000 -d sim_snps.ALT.22.1000x.1.fq sim_snps.ALT.22.1000x.1.
+# files sim_snps.ALT.22.1000x.1.00 sim_snps.ALT.22.1000x.1.01 sim_snps.ALT.22.1000x.1.02 sim_snps.ALT.22.1000x.1.03
+# are created
+```
+I then use a perl script I wrote to format the file names for pysim.
+
+```
+$ perl src/rename_split_fqs.pl
+```
+
+You'll need to change the path to the files in the script. The script will print out `mv` commands that can be written to a shell script.
+
+**Note on pysim conf format**
+Pysim uses `.conf` files to mix the FASTQs. In this file you'll define the degree of mixture and the input file prefixes.
+
+The input prefix for FASTQ file must include all text before the paired-end id <prefix.1.fq>,<prefix.2.fq>. 
+
+Each row is a FASTQ to mix. There are two columns delimited by tabs: the first is the FASTQ prefix, the second is the degree of mixture. 
+
+For example: 1% Allele Fraction
+```
+/oasis/projects/nsf/ddp195/dantakli/sperm/somatic_sim/split/ref.22.1000x.00.    0.99
+/oasis/projects/nsf/ddp195/dantakli/sperm/somatic_sim/split/alt.22.1000x.00.    0.01
+```
+
+To generate the `.conf` file and pysim commands, you can run this script
+
+```
+$ perl src/pysim_mixture_cmd.pl
+```
+
+**Pysim mixture command**
+
+```
+$ python pysim/mixture_v1.py -i <in.conf> -o <out.FASTQ>
+```
+
+## 8. bwa mem align
+
+This is my pipeline. I also have a perl script that will generate shell scripts to run in a job-array
+```
+$ perl src/bwa_snp_cmd.pl
+```
+
+**Note**: before running `bwa mem` ensure you ran `bwa index` on your FASTA file.
+
+**bwa-mem pipeline**
+```
+# align 
+bwa mem -t <threads> -c 500 human_g1k_v37.22.fasta snp_sim.1000x.01AF.1.fq snp_sim.1000x.01AF.2.fq -R "@RG\tID:01AF\tSM:01AF\tLB:01AF\tPL:ILLUMINA" | samtools view -bh -@ <threads> -O BAM -o snp_sim.1000x.01AF.bwamem.bam
+
+# sort
+mkdir -p snp_sim.1000x.01AF_tmp/
+samtools sort -@ <threads> -o snp_sim.1000x.01AF.bwamem.sorted.bam -O BAM -T snp_sim.1000x.01AF_tmp/snp_sim.1000x.01AF snp_sim.1000x.01AF.bwamem.bam
+rm -rf snp_sim.1000x.01AF_tmp/
+
+# index
+samtools index snp_sim.1000x.01AF.bwamem.sorted.bam
+
+# check coverage
+bedtools genomecov -ibam snp_sim.1000x.01AF.bwamem.sorted.bam -g human.hg19.22.genome >sim_snp.1000x.01AF.genomecov.txt
+```
+
+
+## 9. Sub-sample BAM
+
+You can calculate the coverage `bedtools genomecov` estimates by dividing the sum of the product of depth and number of reads o the total number of reads. 
+
+Then take the target coverage and divide by the mean coverage to get the fraction to subsample.
+
+```
+$ samtools view -s <fraction_to_sub-sample> -o <out.bam> <in.bam> 
+```
+
+Check the coverage again with `bedtools genomecov`
+
                                                                                      166,1         Bot
-
