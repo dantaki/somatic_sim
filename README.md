@@ -11,7 +11,7 @@
 6. Simulate Illumina Paired-End Reads for REF and ALT Fastas
 7. Pysim mixture: define somatic allele fractions
 8. Align mixed FASTQs with BWA-MEM 
-9. GATK HaplotypeCaller
+9. Subsample BAMs to desired coverage
 
 ---
 
