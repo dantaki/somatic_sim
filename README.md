@@ -220,7 +220,9 @@ bedtools genomecov -ibam snp_sim.1000x.01AF.bwamem.sorted.bam -g human.hg19.22.g
 
 ## 9. Sub-sample BAM
 
-You can calculate the coverage `bedtools genomecov` estimates by dividing the sum of the product of depth and number of reads o the total number of reads. 
+You can calculate the coverage `bedtools genomecov` estimates by dividing the sum of the product of depth and number of reads to the total number of reads. 
+
+> SUM( DEPTH * N_READS ) / SUM(N_READS)
 
 Then take the target coverage and divide by the mean coverage to get the fraction to subsample.
 
