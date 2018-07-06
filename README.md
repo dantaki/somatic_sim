@@ -144,7 +144,7 @@ ART options:
 * `-s`: standard deviation of the RNA gragment size for paired-end simulations (I think 90 is default)
 
 **Note on coverage**
-Due to possible downsampling in the subsequent pysim mixture step, I recommend simulating higher coverage and down-sampling to the desired coverage after the mixture step. 
+Due to possible downsampling observed after the subsequent pysim mixture step, I recommend simulating higher coverage and down-sampling to the desired coverage after the mixture step. 
 
 I found 1000x simulations are around 670X after the mixture step with bedtools genomecov. This might be due to ART simulating "N" nucleotides found in unmappable regions of the genome (The p-arm of chr22 for example). 
 
