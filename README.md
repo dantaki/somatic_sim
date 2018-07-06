@@ -155,8 +155,8 @@ This script is a memory hog. I found it better to split my FASTQs into files of 
 
 ```
 $ split -l 100000000 -d sim_snps.ALT.22.1000x.1.fq sim_snps.ALT.22.1000x.1.
-# files sim_snps.ALT.22.1000x.1.00 sim_snps.ALT.22.1000x.1.01 sim_snps.ALT.22.1000x.1.02 sim_snps.ALT.22.1000x.1.03
-# are created
+# files sim_snps.ALT.22.1000x.1.00 sim_snps.ALT.22.1000x.1.01 
+# sim_snps.ALT.22.1000x.1.02 sim_snps.ALT.22.1000x.1.03 are created
 ```
 I then use a perl script I wrote to format the file names for pysim.
 
