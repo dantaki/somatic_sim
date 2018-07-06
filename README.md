@@ -32,10 +32,10 @@ $ randomBed -l 1 -n 1000000 -g human.hg19.22.genome  | cut -f 1-3  | sortBed >si
 * Unmappable Regions
 
 ```
-$ intersectBed -a sim_snps.22.bed -b /home/dantakli/resources/repeatmasker/repeatMasker_hg19.bed.gz \
-                                     /home/dantakli/resources/hg19_str.bed.gz \
-                                     /home/dantakli/resources/hg19_segdup.bed \
-                                     /home/dantakli/resources/hg19_umap_k24_mask.bed.gz \
+$ intersectBed -a sim_snps.22.bed -b repeatMasker_hg19.bed.gz \
+                                     hg19_str.bed.gz \
+                                     hg19_segdup.bed \
+                                     hg19_umap_k24_mask.bed.gz \
                                      -wa -v >sim_snps.22.filtered.bed
 ```
 
@@ -92,7 +92,8 @@ $ bwa index human_g1k_v37.22.fasta # bwa index the FASTA file for alignment step
 
 Generate the ALT FASTA file:
 
-* Edit this script to define output file * 
+*Edit this script to define output file* 
+
 ```
 bash scripts/gatk_fasta_alt_maker.sh in.vcf
 ```
